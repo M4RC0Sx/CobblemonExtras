@@ -3,11 +3,10 @@ package dev.chasem.cobblemonextras.commands
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.context.CommandContext
 import dev.chasem.cobblemonextras.CobblemonExtras
+import dev.chasem.cobblemonextras.lang.ExtrasLang
 import dev.chasem.cobblemonextras.permissions.CobblemonExtrasPermissions
-import net.minecraft.ChatFormatting
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.Commands
-import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.HoverEvent
 import net.minecraft.server.level.ServerPlayer
 import net.minecraft.world.item.ItemStack
@@ -22,22 +21,27 @@ class ItemShout {
     }
 
     private fun execute(ctx: CommandContext<CommandSourceStack>): Int {
-        if (ctx.source.player != null) {
-            val player: ServerPlayer = ctx.source.player!!
-            val heldItem: ItemStack = player.mainHandItem
-            var itemHover = HoverEvent.ItemStackInfo(heldItem)
-            val toSend = Component.literal("[").withStyle(ChatFormatting.YELLOW)
-                    .append(Component.literal("ItemShout").withStyle(ChatFormatting.GREEN))
-                    .append(Component.literal("] ").withStyle(ChatFormatting.YELLOW))
-                    .append(player.displayName!!.copy().append(Component.literal(": ")).withStyle(ChatFormatting.WHITE))
+        val player: ServerPlayer = ctx.source.player
+            ?: run {
+                ctx.source.sendFailure(ExtrasLang.get("common.players_only"))
+                return 1
+            }
 
-            val itemName = heldItem.displayName
-            val hoverAbleName = itemName.copy().withStyle(itemName.style.withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_ITEM, itemHover)).withUnderlined(true))
-            toSend.append(hoverAbleName)
-            ctx.source.server.playerList.players.forEach { serverPlayer -> serverPlayer.sendSystemMessage(toSend) }
-        } else {
-            ctx.source.sendFailure(Component.literal("Sorry, this is only for players."))
-        }
+        val heldItem: ItemStack = player.mainHandItem
+        // The item's own name and its hover panel are vanilla's: they are
+        // translatable and rendered by each client, which is exactly what a
+        // shout wants. Only the wrapping text is ours.
+        val hoverable = heldItem.displayName.copy().withStyle(
+            heldItem.displayName.style
+                .applyTo(ExtrasLang.style("itemshout.item_style"))
+                .withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_ITEM, HoverEvent.ItemStackInfo(heldItem)))
+        )
+
+        val toSend = ExtrasLang.get("itemshout.header")
+                .append(player.displayName!!.copy().withStyle(ExtrasLang.style("itemshout.player_style")))
+                .append(ExtrasLang.get("itemshout.separator"))
+                .append(hoverable)
+        ctx.source.server.playerList.players.forEach { it.sendSystemMessage(toSend) }
         return 1
     }
 }

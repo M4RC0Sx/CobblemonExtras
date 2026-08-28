@@ -1,5 +1,6 @@
 package dev.chasem.cobblemonextras.commands
 
+import dev.chasem.cobblemonextras.lang.ExtrasLang
 import com.cobblemon.mod.common.Cobblemon
 import com.cobblemon.mod.common.CobblemonNetwork.sendPacket
 import com.cobblemon.mod.common.battles.BattleFormat
@@ -42,13 +43,13 @@ class BattleSpectate {
         val playerToSpectate: ServerPlayer = EntityArgument.getPlayer(ctx, "player")
 
         if (playerToSpectate.uuid.equals(player.uuid)) {
-            ctx.getSource().sendFailure(Component.literal("Unable to spectate your own battle."))
+            ctx.getSource().sendFailure(ExtrasLang.get("battlespectate.own_battle"))
             return 1
         }
 
         val battle = BattleRegistry.getBattleByParticipatingPlayer(playerToSpectate);
         if (battle == null) {
-            player.sendSystemMessage(Component.literal("${playerToSpectate.name} is not in a battle, failed to spectated.").withStyle(ChatFormatting.RED))
+            player.sendSystemMessage(ExtrasLang.get("battlespectate.not_in_battle", playerToSpectate.name.string))
             return 1
         }
 

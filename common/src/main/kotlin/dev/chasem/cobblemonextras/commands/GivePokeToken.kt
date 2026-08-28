@@ -1,5 +1,6 @@
 package dev.chasem.cobblemonextras.commands
 
+import dev.chasem.cobblemonextras.lang.ExtrasLang
 import com.cobblemon.mod.common.api.pokemon.Natures
 import com.cobblemon.mod.common.api.pokemon.stats.Stats
 import com.mojang.brigadier.CommandDispatcher
@@ -61,7 +62,7 @@ class GivePokeToken {
         val targettedPlayer: ServerPlayer = EntityArgument.getPlayer(ctx, "player")
 
         if (targettedPlayer == null) {
-            ctx.source.sendFailure(Component.literal("Player not found."))
+            ctx.source.sendFailure(ExtrasLang.get("common.player_not_found"))
             return 0
         }
 
@@ -74,7 +75,7 @@ class GivePokeToken {
             val natureText = StringArgumentType.getString(ctx, "nature")
             val nature = Natures.getNature(natureText.replace("cobblemon.nature.", ""))
             if (nature == null) {
-                ctx.source.sendFailure(Component.literal("Nature not found."))
+                ctx.source.sendFailure(ExtrasLang.get("token.nature_not_found"))
                 return 0
             }
             itemStack = NaturePokeToken(nature).generateItem(amount).build()
@@ -102,7 +103,7 @@ class GivePokeToken {
 //        }
 
         if (itemStack == null) {
-            ctx.source.sendFailure(Component.literal("Failed to create PokeToken."))
+            ctx.source.sendFailure(ExtrasLang.get("token.create_failed"))
             return 0
         }
 

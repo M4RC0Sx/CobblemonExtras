@@ -1,5 +1,6 @@
 package dev.chasem.cobblemonextras.menus
 
+import dev.chasem.cobblemonextras.lang.ExtrasLang
 import com.cobblemon.mod.common.Cobblemon.storage
 import dev.chasem.cobblemonextras.util.ItemBuilder
 import dev.chasem.cobblemonextras.util.PokemonUtility
@@ -50,7 +51,7 @@ class PokeSeeMenu : MenuProvider {
                 val item = PokemonUtility.pokemonToItem(pokemon)
                 container.setItem(12 + i + (if (i >= 3) 6 else 0), item)
             } else {
-                container.setItem(12 + i + (if (i >= 3) 6 else 0), ItemBuilder(Items.RED_STAINED_GLASS_PANE).setCustomName(Component.literal("Empty").withStyle(ChatFormatting.GRAY)).build())
+                container.setItem(12 + i + (if (i >= 3) 6 else 0), ItemBuilder(Items.RED_STAINED_GLASS_PANE).setCustomName(ExtrasLang.get("menu.empty_slot")).build())
             }
         }
 
@@ -71,6 +72,6 @@ class PokeSeeMenu : MenuProvider {
     }
 
     override fun getDisplayName(): Component {
-        return Component.literal("${playerToView?.name!!.string} Party")
+        return ExtrasLang.get("pokesee.title", playerToView?.name!!.string)
     }
 }

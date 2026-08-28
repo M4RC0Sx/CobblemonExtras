@@ -1,5 +1,6 @@
 package dev.chasem.cobblemonextras.game.poketokens
 
+import dev.chasem.cobblemonextras.lang.ExtrasLang
 import com.cobblemon.mod.common.api.pokemon.stats.Stat
 import com.cobblemon.mod.common.entity.pokemon.PokemonEntity
 import com.cobblemon.mod.common.platform.events.ServerPlayerEvent
@@ -17,11 +18,11 @@ import net.minecraft.world.item.component.CustomData
 class MaxEVPokeToken(private val stat: Stat) : PokeToken(PokeTokenType.MAXEV) {
 
     override fun getName(): MutableComponent {
-        return Component.literal("Max EVs Token")
+        return ExtrasLang.get("token.evs.name")
     }
 
     override fun getDescription(): MutableComponent {
-        return Component.literal("Right click on a pokemon to give it max EVs.")
+        return ExtrasLang.get("token.evs.lore")
     }
 
     override fun generateItem(amount: Int): ItemBuilder {
@@ -33,7 +34,7 @@ class MaxEVPokeToken(private val stat: Stat) : PokeToken(PokeTokenType.MAXEV) {
         ))
                 .addLore(
                         arrayOf(
-                                Component.literal("Stat: ").withStyle(ChatFormatting.YELLOW),
+                                ExtrasLang.get("token.evs.label"),
                                 Component.literal(stat.displayName.string).withStyle(ChatFormatting.WHITE),
                         )
                 )
@@ -48,7 +49,7 @@ class MaxEVPokeToken(private val stat: Stat) : PokeToken(PokeTokenType.MAXEV) {
                     SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.MASTER, 1.0F, 1.0F
             )
             entity.pokemon.setEV(stat, 252)
-            player.sendSystemMessage(Component.literal("Your ${entity.pokemon.species.translatedName.string} has received the maximum EVs for ${stat.displayName.string}").withStyle(ChatFormatting.YELLOW))
+            player.sendSystemMessage(ExtrasLang.get("token.evs.applied", entity.pokemon.species.translatedName.string, stat.displayName.string))
         }
     }
 

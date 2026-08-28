@@ -1,5 +1,6 @@
 package dev.chasem.cobblemonextras.commands
 
+import dev.chasem.cobblemonextras.lang.ExtrasLang
 import com.cobblemon.mod.common.Cobblemon
 import com.cobblemon.mod.common.battles.BattleFormat
 import com.cobblemon.mod.common.battles.BattleRegistry
@@ -48,17 +49,17 @@ class Battle {
         val battlePartner: ServerPlayer = EntityArgument.getPlayer(ctx, "player")
 
         if (battlePartner.uuid.equals(player.uuid)) {
-            ctx.getSource().sendFailure(Component.literal("Life's tough enough, don't battle yourself."))
+            ctx.getSource().sendFailure(ExtrasLang.get("battle.self"))
             return 1
         }
 
         if (BattleRegistry.getBattleByParticipatingPlayer(player) != null) {
-            player.sendSystemMessage(Component.literal("You can't start a new battle, while in a battle.").withStyle(ChatFormatting.RED))
+            player.sendSystemMessage(ExtrasLang.get("battle.already_battling"))
             return 1
         }
 
         if (BattleRegistry.getBattleByParticipatingPlayer(battlePartner) != null) {
-            player.sendSystemMessage(Component.literal("Opponent is currently in a battle.").withStyle(ChatFormatting.RED))
+            player.sendSystemMessage(ExtrasLang.get("battle.opponent_battling"))
             return 1
         }
 
@@ -68,7 +69,7 @@ class Battle {
         }
 
         if (firstAvailablePokemon == null) {
-            ctx.source.sendFailure(Component.literal("You don't have any available Pokemon to battle with."))
+            ctx.source.sendFailure(ExtrasLang.get("battle.no_pokemon"))
             return 1
         }
 
@@ -81,15 +82,15 @@ class Battle {
         }
         PVPChallengeService.sendRequest(challenge)
 
-        val accept = Component.literal("[ACCEPT]")
+        val accept = ExtrasLang.get("battle.accept")
                 .withStyle(Style.EMPTY.withBold(true).withColor(ChatFormatting.GREEN)
                         .withClickEvent(ClickEvent(ClickEvent.Action.RUN_COMMAND, "/battle ${player.name.string}"))
-                        .withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Accept ${player.name.string} Challenge"))));
+                        .withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, ExtrasLang.get("battle.accept_hover", player.name.string))));
 
-        val deny = Component.literal("[DENY]")
+        val deny = ExtrasLang.get("battle.deny")
                 .withStyle(Style.EMPTY.withBold(true).withColor(ChatFormatting.RED)
                         .withClickEvent(ClickEvent(ClickEvent.Action.RUN_COMMAND, "/battle deny ${player.name.string}"))
-                        .withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Deny ${player.name.string} Challenge"))));
+                        .withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, ExtrasLang.get("battle.deny_hover", player.name.string))));
         battlePartner.sendSystemMessage(accept.copy().append(" ").append(deny))
         return 1;
     }

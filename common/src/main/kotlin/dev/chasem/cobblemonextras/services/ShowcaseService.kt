@@ -1,5 +1,6 @@
 package dev.chasem.cobblemonextras.services
 
+import dev.chasem.cobblemonextras.lang.ExtrasLang
 import com.cobblemon.mod.common.Cobblemon
 import com.cobblemon.mod.common.api.storage.party.PlayerPartyStore
 import com.cobblemon.mod.common.api.storage.pc.PCStore
@@ -213,15 +214,15 @@ object ShowcaseService {
         if (success) {
             if (showcaseEnabled) {
                 val onText = Component.literal("ON").withStyle(Style.EMPTY.withColor(ChatFormatting.GREEN))
-                val msg = Component.literal("Showcase is now ").append(onText)
+                val msg = ExtrasLang.get("showcase.now_on")
                 player.sendSystemMessage(msg)
             } else {
                 val offText = Component.literal("OFF").withStyle(Style.EMPTY.withColor(ChatFormatting.RED))
-                val msg = Component.literal("Showcase is now ").append(offText)
+                val msg = ExtrasLang.get("showcase.now_off")
                 player.sendSystemMessage(msg)
             }
         } else {
-            player.sendSystemMessage(Component.literal("Failed to toggle showcase visibility.").withStyle(Style.EMPTY.withColor(ChatFormatting.RED)))
+            player.sendSystemMessage(ExtrasLang.get("showcase.toggle_failed"))
         }
     }
 

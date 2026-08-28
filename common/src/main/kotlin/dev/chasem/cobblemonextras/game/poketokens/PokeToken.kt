@@ -1,5 +1,6 @@
 package dev.chasem.cobblemonextras.game.poketokens
 
+import dev.chasem.cobblemonextras.lang.ExtrasLang
 import com.cobblemon.mod.common.api.pokemon.Natures
 import com.cobblemon.mod.common.api.pokemon.stats.Stat
 import com.cobblemon.mod.common.api.pokemon.stats.Stats
@@ -30,7 +31,7 @@ abstract class PokeToken(val tokenType: PokeTokenType) {
                 .setCustomName(getName().withStyle(Style.EMPTY.withItalic(false).withColor(ChatFormatting.YELLOW)))
                 .addLore(
                         arrayOf(
-                                Component.literal("One time use").withStyle(Style.EMPTY.withColor(ChatFormatting.RED)),
+                                ExtrasLang.get("token.one_time_use"),
                                 Component.literal(""),
                                 getDescription().withStyle(ChatFormatting.GRAY),
                         )

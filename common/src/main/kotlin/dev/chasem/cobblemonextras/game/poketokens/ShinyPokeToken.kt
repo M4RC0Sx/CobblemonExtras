@@ -1,5 +1,6 @@
 package dev.chasem.cobblemonextras.game.poketokens
 
+import dev.chasem.cobblemonextras.lang.ExtrasLang
 import com.cobblemon.mod.common.entity.pokemon.PokemonEntity
 import com.cobblemon.mod.common.platform.events.ServerPlayerEvent
 import dev.chasem.cobblemonextras.CobblemonExtras
@@ -20,11 +21,11 @@ class ShinyPokeToken : PokeToken(PokeTokenType.SHINY) {
     }
 
     override fun getName(): MutableComponent {
-        return Component.literal("Shiny Token")
+        return ExtrasLang.get("token.shiny.name")
     }
 
     override fun getDescription(): MutableComponent {
-        return Component.literal("Right click on a pokemon to make it shiny.")
+        return ExtrasLang.get("token.shiny.lore")
     }
 
     override fun onUseItem(event: ServerPlayerEvent.RightClickEntity, entity: PokemonEntity) {
@@ -33,7 +34,7 @@ class ShinyPokeToken : PokeToken(PokeTokenType.SHINY) {
         player.playNotifySound(
                 SoundEvents.EXPERIENCE_ORB_PICKUP, SoundSource.MASTER, 1.0F, 1.0F
         )
-        player.sendSystemMessage(Component.literal("Your Pokemon is now shiny!").withStyle(ChatFormatting.YELLOW))
+        player.sendSystemMessage(ExtrasLang.get("token.shiny.applied"))
     }
 
 

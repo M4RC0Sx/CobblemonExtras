@@ -1,5 +1,6 @@
 package dev.chasem.cobblemonextras.commands
 
+import dev.chasem.cobblemonextras.lang.ExtrasLang
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.context.CommandContext
 import dev.chasem.cobblemonextras.CobblemonExtras
@@ -29,14 +30,14 @@ class Showcase {
             val player: ServerPlayer = ctx.getSource().getPlayer()!!
 
             if(!CobblemonExtras.config.showcase.isShowcaseEnabled) {
-                player.sendSystemMessage(Component.literal("Showcase is disabled."));
+                player.sendSystemMessage(ExtrasLang.get("showcase.disabled"));
                 return 1
             }
 
-            player.sendSystemMessage(Component.literal("Toggling player showcase visiblity..."))
+            player.sendSystemMessage(ExtrasLang.get("showcase.toggling"))
             CobblemonExtras.showcaseService.togglePlayerPublic(player, enable)
         } else {
-            ctx.getSource().sendFailure(Component.literal("Sorry, this is only for players."))
+            ctx.getSource().sendFailure(ExtrasLang.get("common.players_only"))
         }
         return 1
     }
@@ -44,15 +45,15 @@ class Showcase {
     private fun execute(ctx: CommandContext<CommandSourceStack>): Int {
         if (ctx.getSource().getPlayer() != null) {
             val player: ServerPlayer = ctx.getSource().getPlayer()!!
-            val hoverable = Component.literal("HERE").withStyle(
+            val hoverable = ExtrasLang.get("showcase.here").withStyle(
                     Style.EMPTY.withUnderlined(true)
                             .withColor(ChatFormatting.AQUA)
                             .withClickEvent(ClickEvent(ClickEvent.Action.OPEN_URL, "https://cobblemonextras.com/"))
-                            .withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Click to go to the Cobblemon Extras website!")))
+                            .withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, ExtrasLang.get("showcase.hover")))
             )
-            player.sendSystemMessage(Component.literal("Find out more about CobblemonExtras Showcase ").append(hoverable))
+            player.sendSystemMessage(ExtrasLang.get("showcase.text").append(hoverable))
         } else {
-            ctx.getSource().sendFailure(Component.literal("Sorry, this is only for players."))
+            ctx.getSource().sendFailure(ExtrasLang.get("common.players_only"))
         }
         return 1
     }

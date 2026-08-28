@@ -1,5 +1,6 @@
 package dev.chasem.cobblemonextras.commands
 
+import dev.chasem.cobblemonextras.lang.ExtrasLang
 import com.cobblemon.mod.common.Cobblemon
 import com.cobblemon.mod.common.api.storage.NoPokemonStoreException
 import com.cobblemon.mod.common.api.storage.pc.PCPosition
@@ -32,21 +33,21 @@ class EmptyBox {
             try {
                 playerPc = Cobblemon.storage.getPC(player)
             } catch (e: NoPokemonStoreException) {
-                player.sendSystemMessage(Component.literal("Error accessing PC..."))
+                player.sendSystemMessage(ExtrasLang.get("emptybox.pc_error"))
                 return -1
             }
             val boxNum: Int = ctx.getArgument<Int>("box", Int::class.java) - 1
             val box = playerPc.boxes[boxNum]
             if (box == null) {
-                player.sendSystemMessage(Component.literal("Error accessing box... $boxNum"))
+                player.sendSystemMessage(ExtrasLang.get("emptybox.box_error", boxNum))
                 return -1
             }
             for (i in 0..29) {
                 playerPc.remove(PCPosition(boxNum, i))
             }
-            player.sendSystemMessage(Component.literal("Box " + (boxNum + 1) + " has been emptied."))
+            player.sendSystemMessage(ExtrasLang.get("emptybox.emptied", boxNum + 1))
         } else {
-            ctx.getSource().sendFailure(Component.literal("Sorry, this is only for players."))
+            ctx.getSource().sendFailure(ExtrasLang.get("common.players_only"))
         }
         return 1
     }

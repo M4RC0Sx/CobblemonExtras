@@ -1,5 +1,6 @@
 package dev.chasem.cobblemonextras.menus
 
+import dev.chasem.cobblemonextras.lang.ExtrasLang
 import com.cobblemon.mod.common.Cobblemon
 import dev.chasem.cobblemonextras.commands.PokeTrade
 import dev.chasem.cobblemonextras.util.ItemBuilder
@@ -27,8 +28,8 @@ import kotlin.math.floor
 class PokeTradeMenu : MenuProvider {
     private val container: SimpleContainer = SimpleContainer(9 * 6)
     private val tradeSession: PokeTrade.TradeSession
-    val unacceptedItem: ItemStack = ItemBuilder(Items.GRAY_DYE).setCustomName(Component.literal("Click to Accept")).build()
-    val acceptedItem: ItemStack = ItemBuilder(Items.LIME_DYE).setCustomName(Component.literal("Accepted. Click to undo.")).build()
+    val unacceptedItem: ItemStack = ItemBuilder(Items.GRAY_DYE).setCustomName(ExtrasLang.get("poketrade.menu_accept")).build()
+    val acceptedItem: ItemStack = ItemBuilder(Items.LIME_DYE).setCustomName(ExtrasLang.get("poketrade.menu_accepted")).build()
 
     constructor (tradeSession: PokeTrade.TradeSession) {
         this.tradeSession = tradeSession;
@@ -69,7 +70,7 @@ class PokeTradeMenu : MenuProvider {
                 item.set(DataComponents.CUSTOM_DATA, CustomData.of(CompoundTag().apply { putInt("slot", i) }))
                 container.setItem(37 + i + (if (i >= 3) 6 else 0), item)
             } else {
-                container.setItem(37 + i + (if (i >= 3) 6 else 0), ItemBuilder(Items.RED_STAINED_GLASS_PANE).setCustomName(Component.literal("Empty").withStyle(ChatFormatting.GRAY)).build())
+                container.setItem(37 + i + (if (i >= 3) 6 else 0), ItemBuilder(Items.RED_STAINED_GLASS_PANE).setCustomName(ExtrasLang.get("menu.empty_slot")).build())
             }
         }
 
@@ -81,7 +82,7 @@ class PokeTradeMenu : MenuProvider {
                 item.set(DataComponents.CUSTOM_DATA, CustomData.of(CompoundTag().apply { putInt("slot", i) }))
                 container.setItem(41 + i + (if (i >= 3) 6 else 0), item)
             } else {
-                container.setItem(41 + i + (if (i >= 3) 6 else 0), ItemBuilder(Items.RED_STAINED_GLASS_PANE).setCustomName(Component.literal("Empty").withStyle(ChatFormatting.GRAY)).build())
+                container.setItem(41 + i + (if (i >= 3) 6 else 0), ItemBuilder(Items.RED_STAINED_GLASS_PANE).setCustomName(ExtrasLang.get("menu.empty_slot")).build())
             }
         }
 
@@ -90,7 +91,7 @@ class PokeTradeMenu : MenuProvider {
             override fun clicked(slot: Int, buttonNo: Int, clickType: ClickType, player: Player) {
                 if (tradeSession.cancelled) {
                     val serverPlayer = player as ServerPlayer
-                    serverPlayer.sendSystemMessage(Component.literal("Trade has been cancelled.").withStyle(ChatFormatting.RED))
+                    serverPlayer.sendSystemMessage(ExtrasLang.get("poketrade.cancelled"))
                     serverPlayer.closeContainer()
                 }
                 val row = floor(slot.toDouble() / 9.0)

@@ -1,5 +1,6 @@
 package dev.chasem.cobblemonextras.commands
 
+import dev.chasem.cobblemonextras.lang.ExtrasLang
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.context.CommandContext
 import net.minecraft.ChatFormatting
@@ -22,15 +23,15 @@ class PlayerGames {
     private fun execute(ctx: CommandContext<CommandSourceStack>): Int {
         if (ctx.getSource().getPlayer() != null) {
             val player: ServerPlayer = ctx.getSource().getPlayer()!!
-            val hoverable = Component.literal("PLAYER GAMES").withStyle(
+            val hoverable = ExtrasLang.get("playergames.title").withStyle(
                     Style.EMPTY.withUnderlined(true)
                             .withColor(ChatFormatting.LIGHT_PURPLE)
                             .withClickEvent(ClickEvent(ClickEvent.Action.OPEN_URL, "https://www.player.games/en-US/creator-hub"))
-                            .withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Click to go to Player.Games!")))
+                            .withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, ExtrasLang.get("playergames.hover")))
             )
-            player.sendSystemMessage(Component.literal("Create your own Minecraft mod with ").append(hoverable))
+            player.sendSystemMessage(ExtrasLang.get("playergames.text").append(hoverable))
         } else {
-            ctx.getSource().sendFailure(Component.literal("Sorry, this is only for players."))
+            ctx.getSource().sendFailure(ExtrasLang.get("common.players_only"))
         }
         return 1
     }

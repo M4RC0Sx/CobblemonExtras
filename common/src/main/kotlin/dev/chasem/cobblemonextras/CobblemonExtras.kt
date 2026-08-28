@@ -11,6 +11,7 @@ import dev.chasem.cobblemonextras.commands.*
 import dev.chasem.cobblemonextras.config.CobblemonExtrasConfig
 import dev.chasem.cobblemonextras.events.CobblemonExtrasEventHandler
 import dev.chasem.cobblemonextras.events.PokeTokensInteractionHandler
+import dev.chasem.cobblemonextras.lang.ExtrasLang
 import dev.chasem.cobblemonextras.permissions.CobblemonExtrasPermissions
 import dev.chasem.cobblemonextras.services.ShowcaseService
 import net.minecraft.commands.CommandSourceStack
@@ -33,6 +34,8 @@ object CobblemonExtras {
     fun initialize() {
         getLogger().info("CobblemonExtras - Initialized")
         loadConfig() // must load before permissions so perms use default permission level.
+        // After the config, because it is the config that names the language.
+        ExtrasLang.load(config.language)
 
         getLogger().info("CobblemonExtras - Custom Model Data")
         getLogger().info("IV Token: ${config.customModels.IV_TOKEN}")

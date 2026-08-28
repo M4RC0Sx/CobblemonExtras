@@ -1,5 +1,6 @@
 package dev.chasem.cobblemonextras.menus
 
+import dev.chasem.cobblemonextras.lang.ExtrasLang
 import com.cobblemon.mod.common.Cobblemon
 import com.cobblemon.mod.common.Cobblemon.storage
 import com.cobblemon.mod.common.CobblemonItems
@@ -69,9 +70,9 @@ class CompSeeMenu : MenuProvider {
 
 
 
-        container?.setItem(42, ItemBuilder(Items.ARROW).hideAdditional().setCustomName(Component.literal("Goto Box ${ getPreviousBox() + 1 }")).build())
-        container?.setItem(43, ItemBuilder(CobblemonItems.PC).hideAdditional().setCustomName(Component.literal("Current Box ${ boxNumber + 1 }")).build())
-        container?.setItem(44, ItemBuilder(Items.ARROW).hideAdditional().setCustomName(Component.literal("Goto Box ${ getNextBox() + 1 }")).build())
+        container?.setItem(42, ItemBuilder(Items.ARROW).hideAdditional().setCustomName(ExtrasLang.get("compsee.previous_box", getPreviousBox() + 1)).build())
+        container?.setItem(43, ItemBuilder(CobblemonItems.PC).hideAdditional().setCustomName(ExtrasLang.get("compsee.current_box", boxNumber + 1)).build())
+        container?.setItem(44, ItemBuilder(Items.ARROW).hideAdditional().setCustomName(ExtrasLang.get("compsee.next_box", getNextBox() + 1)).build())
 
 
         var pcStore: PCStore? = null
@@ -93,7 +94,7 @@ class CompSeeMenu : MenuProvider {
                 val item = PokemonUtility.pokemonToItem(pokemon)
                 container.setItem((row * 9).toInt() + index, item)
             } else {
-                container.setItem((row * 9).toInt() + index, ItemBuilder(Items.RED_STAINED_GLASS_PANE).setCustomName(Component.literal("Empty").withStyle(ChatFormatting.GRAY)).build())
+                container.setItem((row * 9).toInt() + index, ItemBuilder(Items.RED_STAINED_GLASS_PANE).setCustomName(ExtrasLang.get("menu.empty_slot")).build())
             }
         }
     }
@@ -124,6 +125,6 @@ class CompSeeMenu : MenuProvider {
     }
 
     override fun getDisplayName(): Component {
-        return Component.literal("${Component.literal(playerToView?.name!!.string).withStyle(ChatFormatting.DARK_GRAY).string} PC")
+        return ExtrasLang.get("compsee.title", playerToView?.name!!.string)
     }
 }

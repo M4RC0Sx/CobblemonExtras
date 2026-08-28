@@ -11,6 +11,14 @@ class CobblemonExtrasConfig {
     @SerializedName("customModels")
     var customModels: CustomModelsConfig = CustomModelsConfig()
 
+    /**
+     * Which file under config/cobblemonextras/lang/ the messages are read from.
+     *
+     * They are resolved server-side, so every player reads this language
+     * whatever client they run. Anything missing falls back to en_us.
+     */
+    var language: String = "en_us"
+
 
     inner class PermissionLevels {
         @SerializedName("command.poketrade")

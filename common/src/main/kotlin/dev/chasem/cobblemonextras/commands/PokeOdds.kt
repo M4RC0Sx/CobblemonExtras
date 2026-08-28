@@ -1,5 +1,6 @@
 package dev.chasem.cobblemonextras.commands
 
+import dev.chasem.cobblemonextras.lang.ExtrasLang
 import com.cobblemon.mod.common.Cobblemon
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.arguments.FloatArgumentType
@@ -51,15 +52,15 @@ class PokeOdds {
         try {
             saveCobblemonConfig(rate)
             ctx.source.sendSystemMessage(
-                Component.literal("The shiny rate has been set to: ").withStyle(ChatFormatting.GOLD)
+                ExtrasLang.get("pokeodds.set")
                     .append(Component.literal(rate.toString()).withStyle(ChatFormatting.AQUA))
-                    .append(Component.literal(" (saved to config)").withStyle(ChatFormatting.GREEN))
+                    .append(ExtrasLang.get("pokeodds.saved"))
             )
         } catch (e: Exception) {
             ctx.source.sendSystemMessage(
-                Component.literal("The shiny rate has been set to: ").withStyle(ChatFormatting.GOLD)
+                ExtrasLang.get("pokeodds.set")
                     .append(Component.literal(rate.toString()).withStyle(ChatFormatting.AQUA))
-                    .append(Component.literal(" (WARNING: failed to save to config)").withStyle(ChatFormatting.RED))
+                    .append(ExtrasLang.get("pokeodds.save_failed"))
             )
             CobblemonExtras.getLogger().error("Failed to save Cobblemon config after setting shiny rate", e)
         }
@@ -100,7 +101,7 @@ class PokeOdds {
 
     private fun execute(ctx: CommandContext<CommandSourceStack>): Int {
         ctx.source.sendSystemMessage(
-            Component.literal("The current shiny rate is: ").withStyle(ChatFormatting.GOLD)
+            ExtrasLang.get("pokeodds.current")
                 .append(Component.literal(Cobblemon.config.shinyRate.toString()).withStyle(ChatFormatting.AQUA))
         )
         return 1

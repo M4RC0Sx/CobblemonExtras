@@ -1,5 +1,6 @@
 package dev.chasem.cobblemonextras.commands
 
+import dev.chasem.cobblemonextras.lang.ExtrasLang
 import com.cobblemon.mod.common.Cobblemon.storage
 import com.cobblemon.mod.common.api.storage.party.PartyPosition
 import com.mojang.brigadier.CommandDispatcher
@@ -32,12 +33,12 @@ class PokeDelete {
         val party = storage.getParty(player)
         val pokemon = party.get(slotNum)
         if (pokemon != null) {
-            val toSend = Component.literal("Deleted: ").append(Component.literal("").setStyle(Style.EMPTY.withBold(true)))
+            val toSend = ExtrasLang.get("delete.deleted").append(Component.literal("").setStyle(Style.EMPTY.withBold(true)))
             val text = PokemonUtility.getHoverText(toSend, pokemon)
             ctx.source.sendSystemMessage(text)
             party.remove(PartyPosition(slotNum))
         } else {
-            ctx.source.sendSystemMessage(Component.literal("No Pokemon found in slot.").withStyle(ChatFormatting.RED))
+            ctx.source.sendSystemMessage(ExtrasLang.get("delete.not_found"))
         }
 
         return 1

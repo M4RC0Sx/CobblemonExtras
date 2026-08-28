@@ -1,5 +1,6 @@
 package dev.chasem.cobblemonextras.commands
 
+import dev.chasem.cobblemonextras.lang.ExtrasLang
 import com.cobblemon.mod.common.Cobblemon
 import com.cobblemon.mod.common.Cobblemon.storage
 import com.cobblemon.mod.common.battles.BattleBuilder.pve
@@ -38,17 +39,17 @@ class PokeBattle {
         try {
             battlingPlayer = EntityArgument.getPlayer(ctx, "player")
         } catch (e: CommandSyntaxException) {
-            ctx.source.sendFailure(Component.literal("Error finding player."))
+            ctx.source.sendFailure(ExtrasLang.get("common.player_not_found"))
             return 1
         }
         val pokemonProperties = getPokemonProperties(ctx, "properties")
         if (pokemonProperties.species == null) {
-            ctx.source.sendSystemMessage(Component.literal("No pokemon found for species provided"))
+            ctx.source.sendSystemMessage(ExtrasLang.get("pokebattle.species_not_found"))
             return 1
         }
 
         if (getBattleByParticipatingPlayer(battlingPlayer) != null) {
-            ctx.source.sendSystemMessage(Component.literal("Player is in an active battle.").withStyle(ChatFormatting.RED))
+            ctx.source.sendSystemMessage(ExtrasLang.get("pokebattle.already_battling"))
             return 1
         }
 
@@ -61,7 +62,7 @@ class PokeBattle {
         }
 
         if (pokemonUUID == null) {
-            ctx.source.sendSystemMessage(Component.literal("Player unable to battle, no available pokemon in their party.").withStyle(ChatFormatting.RED))
+            ctx.source.sendSystemMessage(ExtrasLang.get("pokebattle.no_pokemon"))
             return 1
         }
 
@@ -73,7 +74,7 @@ class PokeBattle {
             pokemonEntity.teleportTo(battlingPlayer.x, battlingPlayer.y, battlingPlayer.z)
             pve(battlingPlayer, pokemonEntity, pokemonUUID, BattleFormat.Companion.GEN_9_SINGLES, false, false, Cobblemon.config.defaultFleeDistance, party)
         } else {
-            ctx.source.sendFailure(Component.literal("Failed to spawn Pokemon in world for player..."))
+            ctx.source.sendFailure(ExtrasLang.get("pokebattle.spawn_failed"))
         }
         return 1
     }

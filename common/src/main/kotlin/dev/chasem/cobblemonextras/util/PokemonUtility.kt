@@ -4,6 +4,7 @@ import com.cobblemon.mod.common.api.pokemon.stats.Stats
 import com.cobblemon.mod.common.item.PokemonItem
 import com.cobblemon.mod.common.pokemon.Pokemon
 import com.cobblemon.mod.common.util.lang
+import dev.chasem.cobblemonextras.lang.ExtrasLang
 import net.minecraft.ChatFormatting
 import net.minecraft.network.chat.Component
 import net.minecraft.network.chat.HoverEvent
@@ -14,155 +15,162 @@ import java.lang.Boolean
 import kotlin.arrayOf
 
 object PokemonUtility {
+    /**
+     * Builds the chat line's hover buttons: [Stats], [EVs], [IVs], [Moves].
+     *
+     * Every label, colour and separator comes from ExtrasLang, so the whole
+     * thing can be translated and restyled from a file. The pieces that stay
+     * components — the species name, the nature, the ability — do so on purpose:
+     * they are translatable, and flattening them here would freeze every player
+     * into the server's language. Their colour still comes from the file, via
+     * ExtrasLang.style.
+     */
     fun getHoverText(toSend: MutableComponent, pokemon: Pokemon): Component {
+        val newLine = Component.literal("\n")
+
         val statsHoverText = Component.literal("").withStyle(Style.EMPTY)
-
         if (pokemon.shiny) {
-            statsHoverText.append(Component.literal(" ★").withStyle(ChatFormatting.GOLD))
+            statsHoverText.append(ExtrasLang.get("hover.stats.shiny"))
         }
-        statsHoverText.append(pokemon.species.translatedName.copy().withStyle(Style.EMPTY.withColor(ChatFormatting.DARK_GREEN).withUnderlined(true)))
-        statsHoverText.append(Component.literal("\n"))
+        statsHoverText.append(pokemon.species.translatedName.copy().withStyle(ExtrasLang.style("hover.stats.species_style")))
+        statsHoverText.append(newLine)
         if (pokemon.nickname != null) {
-            statsHoverText.append(Component.literal("Nickname: ").withStyle(ChatFormatting.GRAY).append(Component.literal(pokemon.nickname!!.string).withStyle(ChatFormatting.WHITE)))
-            statsHoverText.append(Component.literal("\n"))
+            statsHoverText.append(ExtrasLang.get("hover.stats.nickname", pokemon.nickname!!.string))
+            statsHoverText.append(newLine)
         }
-        statsHoverText.append(Component.literal("Level: ").withStyle(ChatFormatting.AQUA).append(Component.literal(pokemon.level.toString()).withStyle(ChatFormatting.WHITE)))
-        statsHoverText.append(Component.literal("\n"))
-        statsHoverText.append(Component.literal("Nature: ").withStyle(ChatFormatting.YELLOW).append(lang(pokemon.nature.displayName.replace("cobblemon.", "")).withStyle(ChatFormatting.WHITE)))
-        statsHoverText.append(Component.literal("\n"))
-        statsHoverText.append(Component.literal("Ability: ").withStyle(ChatFormatting.GOLD).append(lang(pokemon.ability.displayName.replace("cobblemon.", "")).withStyle(ChatFormatting.WHITE)))
-        statsHoverText.append(Component.literal("\n"))
-        statsHoverText.append(Component.literal("Form: ").withStyle(ChatFormatting.GREEN).append(Component.literal(pokemon.form.name).withStyle(ChatFormatting.WHITE)))
+        statsHoverText.append(ExtrasLang.get("hover.stats.level", pokemon.level))
+        statsHoverText.append(newLine)
+        statsHoverText.append(
+            ExtrasLang.get("hover.stats.nature")
+                .append(lang(pokemon.nature.displayName.replace("cobblemon.", "")).withStyle(ExtrasLang.style("hover.stats.nature_style")))
+        )
+        statsHoverText.append(newLine)
+        statsHoverText.append(
+            ExtrasLang.get("hover.stats.ability")
+                .append(lang(pokemon.ability.displayName.replace("cobblemon.", "")).withStyle(ExtrasLang.style("hover.stats.ability_style")))
+        )
+        statsHoverText.append(newLine)
+        statsHoverText.append(ExtrasLang.get("hover.stats.form", pokemon.form.name))
 
-        val statsText = Component.literal("[Stats]").withStyle(Style.EMPTY.withColor(ChatFormatting.RED)
-                .withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, statsHoverText)))
+        toSend.append(hoverButton("hover.button.stats", statsHoverText))
 
-        toSend.append(statsText)
+        // EVs cap at 510 across all six, so the percentage is of that total.
+        val allEvs = (pokemon.evs.getOrDefault(Stats.HP) + pokemon.evs.getOrDefault(Stats.ATTACK)
+                + pokemon.evs.getOrDefault(Stats.DEFENCE) + pokemon.evs.getOrDefault(Stats.SPECIAL_ATTACK)
+                + pokemon.evs.getOrDefault(Stats.SPECIAL_DEFENCE) + pokemon.evs.getOrDefault(Stats.SPEED)).toDouble()
+        val evPercent = Math.round((allEvs / 510.0) * 10000).toDouble() / 100
 
-        // Add up Evs, round to 2 decimal places, multiply by 100 to get percent
-        val allEvs = (pokemon.evs.getOrDefault(Stats.HP) + pokemon.evs.getOrDefault(Stats.ATTACK) + pokemon.evs.getOrDefault(Stats.DEFENCE) + pokemon.evs.getOrDefault(Stats.SPECIAL_ATTACK) + pokemon.evs.getOrDefault(Stats.SPECIAL_DEFENCE) + pokemon.evs.getOrDefault(Stats.SPEED)).toDouble()
-        val avg = (allEvs / (510.0))
-        val evPercent = Math.round(avg * 10000).toDouble() / 100
-
-        val evsText = Component.literal("[EVs]").withStyle(ChatFormatting.GOLD)
         val evsHoverText = Component.literal("").withStyle(Style.EMPTY)
-        evsHoverText.append(Component.literal("EVs ($evPercent%) ").withStyle(Style.EMPTY.withColor(ChatFormatting.GOLD).withUnderlined(Boolean.TRUE)))
-        evsHoverText.append(Component.literal("\n").withStyle(Style.EMPTY.withUnderlined(false)))
-        evsHoverText.append(Component.literal("HP: ").withStyle(ChatFormatting.RED).append(Component.literal(pokemon.evs.getOrDefault(Stats.HP).toString()).withStyle(ChatFormatting.WHITE)))
-        evsHoverText.append(Component.literal("\n"))
-        evsHoverText.append(Component.literal("Attack: ").withStyle(ChatFormatting.BLUE).append(Component.literal(pokemon.evs.getOrDefault(Stats.ATTACK).toString()).withStyle(ChatFormatting.WHITE)))
-        evsHoverText.append(Component.literal("\n"))
-        evsHoverText.append(Component.literal("Defense: ").withStyle(ChatFormatting.GRAY).append(Component.literal(pokemon.evs.getOrDefault(Stats.DEFENCE).toString()).withStyle(ChatFormatting.WHITE)))
-        evsHoverText.append(Component.literal("\n"))
-        evsHoverText.append(Component.literal("Sp. Attack: ").withStyle(ChatFormatting.AQUA).append(Component.literal(pokemon.evs.getOrDefault(Stats.SPECIAL_ATTACK).toString()).withStyle(ChatFormatting.WHITE)))
-        evsHoverText.append(Component.literal("\n"))
-        evsHoverText.append(Component.literal("Sp. Defense: ").withStyle(ChatFormatting.YELLOW).append(Component.literal(pokemon.evs.getOrDefault(Stats.SPECIAL_DEFENCE).toString()).withStyle(ChatFormatting.WHITE)))
-        evsHoverText.append(Component.literal("\n"))
-        evsHoverText.append(Component.literal("Speed: ").withStyle(ChatFormatting.GREEN).append(Component.literal(pokemon.evs.getOrDefault(Stats.SPEED).toString()).withStyle(ChatFormatting.WHITE)))
-        evsText.setStyle(evsText.style.withHoverEvent(
-                HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                        evsHoverText
-                ))
-        )
-        toSend.append(evsText)
+        evsHoverText.append(ExtrasLang.get("hover.evs.title", evPercent))
+        appendStatLines(evsHoverText, newLine, "hover.evs", pokemon.evs::getOrDefault)
+        toSend.append(hoverButton("hover.button.evs", evsHoverText))
 
-        // Add up Ivs, take average, round to 2 decimal places, multiply by 100 to get percent
-        val allIvs = pokemon.ivs.getOrDefault(Stats.HP) + pokemon.ivs.getOrDefault(Stats.ATTACK) + pokemon.ivs.getOrDefault(Stats.DEFENCE) + pokemon.ivs.getOrDefault(Stats.SPECIAL_ATTACK) + pokemon.ivs.getOrDefault(Stats.SPECIAL_DEFENCE) + pokemon.ivs.getOrDefault(Stats.SPEED)
-        val ivAvg = (allIvs / (186.0))
-        val ivPercent = Math.round(ivAvg * 10000).toDouble() / 100
+        // IVs cap at 31 each, 186 across the six.
+        val allIvs = pokemon.ivs.getOrDefault(Stats.HP) + pokemon.ivs.getOrDefault(Stats.ATTACK) +
+                pokemon.ivs.getOrDefault(Stats.DEFENCE) + pokemon.ivs.getOrDefault(Stats.SPECIAL_ATTACK) +
+                pokemon.ivs.getOrDefault(Stats.SPECIAL_DEFENCE) + pokemon.ivs.getOrDefault(Stats.SPEED)
+        val ivPercent = Math.round((allIvs / 186.0) * 10000).toDouble() / 100
 
-        val ivsText = Component.literal("[IVs]").withStyle(ChatFormatting.LIGHT_PURPLE)
         val ivsHoverText = Component.literal("").withStyle(Style.EMPTY)
-        ivsHoverText.append(Component.literal("IVs ($ivPercent%)").withStyle(Style.EMPTY.withColor(ChatFormatting.LIGHT_PURPLE).withUnderlined(true)))
-        ivsHoverText.append(Component.literal("\n").withStyle(Style.EMPTY.withUnderlined(false)))
-        ivsHoverText.append(Component.literal("HP: ").withStyle(ChatFormatting.RED).append(Component.literal(pokemon.ivs.getOrDefault(Stats.HP).toString()).withStyle(ChatFormatting.WHITE)))
-        ivsHoverText.append(Component.literal("\n"))
-        ivsHoverText.append(Component.literal("Attack: ").withStyle(ChatFormatting.BLUE).append(Component.literal(pokemon.ivs.getOrDefault(Stats.ATTACK).toString()).withStyle(ChatFormatting.WHITE)))
-        ivsHoverText.append(Component.literal("\n"))
-        ivsHoverText.append(Component.literal("Defense: ").withStyle(ChatFormatting.GRAY).append(Component.literal(pokemon.ivs.getOrDefault(Stats.DEFENCE).toString()).withStyle(ChatFormatting.WHITE)))
-        ivsHoverText.append(Component.literal("\n"))
-        ivsHoverText.append(Component.literal("Sp. Attack: ").withStyle(ChatFormatting.AQUA).append(Component.literal(pokemon.ivs.getOrDefault(Stats.SPECIAL_ATTACK).toString()).withStyle(ChatFormatting.WHITE)))
-        ivsHoverText.append(Component.literal("\n"))
-        ivsHoverText.append(Component.literal("Sp. Defense: ").withStyle(ChatFormatting.YELLOW).append(Component.literal(pokemon.ivs.getOrDefault(Stats.SPECIAL_DEFENCE).toString()).withStyle(ChatFormatting.WHITE)))
-        ivsHoverText.append(Component.literal("\n"))
-        ivsHoverText.append(Component.literal("Speed: ").withStyle(ChatFormatting.GREEN).append(Component.literal(pokemon.ivs.getOrDefault(Stats.SPEED).toString()).withStyle(ChatFormatting.WHITE)))
-        ivsText.setStyle(ivsText.style.withHoverEvent(
-                HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                        ivsHoverText
-                ))
-        )
-        toSend.append(ivsText)
+        ivsHoverText.append(ExtrasLang.get("hover.ivs.title", ivPercent))
+        appendStatLines(ivsHoverText, newLine, "hover.ivs", pokemon.ivs::getOrDefault)
+        toSend.append(hoverButton("hover.button.ivs", ivsHoverText))
 
-        val movesText = Component.literal("[Moves]").withStyle(ChatFormatting.BLUE)
         val movesHoverText = Component.literal("").withStyle(Style.EMPTY)
-        movesHoverText.append(Component.literal("Moves").withStyle(Style.EMPTY.withColor(ChatFormatting.BLUE).withUnderlined(Boolean.TRUE)))
-        movesHoverText.append(Component.literal("\n").withStyle(Style.EMPTY.withUnderlined(false)))
-        val moveOne = if (pokemon.moveSet.getMoves().size >= 1) pokemon.moveSet[0]!!.displayName.string else "Empty"
-        val moveTwo = if (pokemon.moveSet.getMoves().size >= 2) pokemon.moveSet[1]!!.displayName.string else "Empty"
-        val moveThree = if (pokemon.moveSet.getMoves().size >= 3) pokemon.moveSet[2]!!.displayName.string else "Empty"
-        val moveFour = if (pokemon.moveSet.getMoves().size >= 4) pokemon.moveSet[3]!!.displayName.string else "Empty"
-        movesHoverText.append(Component.literal("Move 1: ").withStyle(ChatFormatting.RED).append(Component.literal(moveOne).withStyle(ChatFormatting.WHITE)))
-        movesHoverText.append(Component.literal("\n"))
-        movesHoverText.append(Component.literal("Move 2: ").withStyle(ChatFormatting.YELLOW).append(Component.literal(moveTwo).withStyle(ChatFormatting.WHITE)))
-        movesHoverText.append(Component.literal("\n"))
-        movesHoverText.append(Component.literal("Move 3: ").withStyle(ChatFormatting.AQUA).append(Component.literal(moveThree).withStyle(ChatFormatting.WHITE)))
-        movesHoverText.append(Component.literal("\n"))
-        movesHoverText.append(Component.literal("Move 4: ").withStyle(ChatFormatting.GREEN).append(Component.literal(moveFour).withStyle(ChatFormatting.WHITE)))
-        movesText.setStyle(movesText.style.withHoverEvent(
-                HoverEvent(HoverEvent.Action.SHOW_TEXT,
-                        movesHoverText
-                ))
-        )
-        toSend.append(movesText)
+        movesHoverText.append(ExtrasLang.get("hover.moves.title"))
+        val moveKeys = listOf("hover.moves.one", "hover.moves.two", "hover.moves.three", "hover.moves.four")
+        for (i in moveKeys.indices) {
+            val name = if (pokemon.moveSet.getMoves().size >= i + 1) {
+                pokemon.moveSet[i]!!.displayName.string
+            } else {
+                ExtrasLang.raw("hover.moves.empty")
+            }
+            movesHoverText.append(newLine).append(ExtrasLang.get(moveKeys[i], name))
+        }
+        toSend.append(hoverButton("hover.button.moves", movesHoverText))
 
         return toSend
     }
 
+    /** A clickable-looking label whose whole purpose is to carry a hover panel. */
+    private fun hoverButton(labelKey: String, hover: Component): MutableComponent {
+        val label = ExtrasLang.get(labelKey)
+        label.style = label.style.withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, hover))
+        return label
+    }
+
+    /**
+     * The six stat lines, in one place.
+     *
+     * EVs and IVs print the same six labels in the same order and differ only in
+     * which map they read, so they share this rather than sixteen near-identical
+     * lines that drift apart the first time somebody renames a stat.
+     */
+    private fun appendStatLines(
+        target: MutableComponent,
+        newLine: Component,
+        prefix: String,
+        value: (com.cobblemon.mod.common.api.pokemon.stats.Stat) -> Int
+    ) {
+        val rows = listOf(
+            "hp" to Stats.HP,
+            "attack" to Stats.ATTACK,
+            "defence" to Stats.DEFENCE,
+            "special_attack" to Stats.SPECIAL_ATTACK,
+            "special_defence" to Stats.SPECIAL_DEFENCE,
+            "speed" to Stats.SPEED
+        )
+        for ((suffix, stat) in rows) {
+            target.append(newLine).append(ExtrasLang.get("$prefix.$suffix", value(stat)))
+        }
+    }
+
+    /**
+     * The Pokemon as an inventory item, for the /pokesee and /compsee menus.
+     *
+     * Same rule as the chat hover: labels and colours come from the language
+     * file, while the ball, nature, ability and species names stay components
+     * so each client reads them in its own language.
+     */
     fun pokemonToItem(pokemon: Pokemon): ItemStack {
-        val moveOne = if (pokemon.moveSet.getMoves().size >= 1) pokemon.moveSet[0]!!.displayName.string else "Empty"
-        val moveTwo = if (pokemon.moveSet.getMoves().size >= 2) pokemon.moveSet[1]!!.displayName.string else "Empty"
-        val moveThree = if (pokemon.moveSet.getMoves().size >= 3) pokemon.moveSet[2]!!.displayName.string else "Empty"
-        val moveFour = if (pokemon.moveSet.getMoves().size >= 4) pokemon.moveSet[3]!!.displayName.string else "Empty"
+        val ivs = pokemon.ivs
+        val evs = pokemon.evs
+        val lore = mutableListOf<Component>()
 
+        lore.add(pokemon.caughtBall.item().defaultInstance.displayName.copy().withStyle(ExtrasLang.style("item.ball_style")))
+        lore.add(ExtrasLang.get("item.level", pokemon.level))
+        lore.add(ExtrasLang.get("item.nickname", pokemon.nickname?.string ?: ExtrasLang.raw("item.no_nickname")))
+        lore.add(ExtrasLang.get("item.nature").append(lang(pokemon.nature.displayName.replace("cobblemon.", "")).withStyle(ExtrasLang.style("item.nature_style"))))
+        lore.add(ExtrasLang.get("item.ability").append(lang(pokemon.ability.displayName.replace("cobblemon.", "")).withStyle(ExtrasLang.style("item.ability_style"))))
 
+        lore.add(ExtrasLang.get("item.ivs_header"))
+        lore.add(ExtrasLang.get("item.stats_line_one", ivs.getOrDefault(Stats.HP), ivs.getOrDefault(Stats.ATTACK), ivs.getOrDefault(Stats.DEFENCE)))
+        lore.add(ExtrasLang.get("item.stats_line_two", ivs.getOrDefault(Stats.SPECIAL_ATTACK), ivs.getOrDefault(Stats.SPECIAL_DEFENCE), ivs.getOrDefault(Stats.SPEED)))
 
-        val itemstack: ItemStack = ItemBuilder(PokemonItem.from(pokemon,1))
-                .hideAdditional()
-                .addLore(arrayOf<Component>(Component.literal(pokemon.caughtBall.item().defaultInstance.displayName.string).setStyle(Style.EMPTY.withItalic(true).withColor(ChatFormatting.DARK_GRAY)),
-                        Component.literal("Level: ").withStyle(ChatFormatting.AQUA).append(Component.literal(pokemon.level.toString()).withStyle(ChatFormatting.WHITE)),
+        lore.add(ExtrasLang.get("item.evs_header"))
+        lore.add(ExtrasLang.get("item.stats_line_one", evs.getOrDefault(Stats.HP), evs.getOrDefault(Stats.ATTACK), evs.getOrDefault(Stats.DEFENCE)))
+        lore.add(ExtrasLang.get("item.stats_line_two", evs.getOrDefault(Stats.SPECIAL_ATTACK), evs.getOrDefault(Stats.SPECIAL_DEFENCE), evs.getOrDefault(Stats.SPEED)))
 
-                        Component.literal("Nickname: ").withStyle(ChatFormatting.DARK_GREEN).append(Component.literal(
-                                pokemon.nickname?.string ?: "No nickname"
-                        ).withStyle(ChatFormatting.WHITE)),
+        lore.add(ExtrasLang.get("item.moves_header"))
+        for (i in 0..3) {
+            val name = if (pokemon.moveSet.getMoves().size >= i + 1) {
+                pokemon.moveSet[i]!!.displayName.string
+            } else {
+                ExtrasLang.raw("hover.moves.empty")
+            }
+            lore.add(ExtrasLang.get("item.move", name))
+        }
+        lore.add(ExtrasLang.get("item.form", pokemon.form.name))
 
-                        Component.literal("Nature: ").withStyle(ChatFormatting.YELLOW).append(lang(pokemon.nature.displayName.replace("cobblemon.", "")).withStyle(ChatFormatting.WHITE)),
-                        Component.literal("Ability: ").withStyle(ChatFormatting.GOLD).append(lang(pokemon.ability.displayName.replace("cobblemon.", "")).withStyle(ChatFormatting.WHITE)),
-                        Component.literal("IVs: ").withStyle(ChatFormatting.LIGHT_PURPLE),
-                        Component.literal("  HP: ").withStyle(ChatFormatting.RED).append(Component.literal(pokemon.ivs.getOrDefault(Stats.HP).toString()).withStyle(ChatFormatting.WHITE))
-                                .append(Component.literal("  Atk: ").withStyle(ChatFormatting.BLUE).append(Component.literal(pokemon.ivs.getOrDefault(Stats.ATTACK).toString()).withStyle(ChatFormatting.WHITE)))
-                                .append(Component.literal("  Def: ").withStyle(ChatFormatting.GRAY).append(Component.literal(pokemon.ivs.getOrDefault(Stats.DEFENCE).toString()).withStyle(ChatFormatting.WHITE))),
-                        Component.literal("  SpAtk: ").withStyle(ChatFormatting.AQUA).append(Component.literal(pokemon.ivs.getOrDefault(Stats.SPECIAL_ATTACK).toString()).withStyle(ChatFormatting.WHITE))
-                                .append(Component.literal("  SpDef: ").withStyle(ChatFormatting.YELLOW).append(Component.literal(pokemon.ivs.getOrDefault(Stats.SPECIAL_DEFENCE).toString()).withStyle(ChatFormatting.WHITE)))
-                                .append(Component.literal("  Spd: ").withStyle(ChatFormatting.GREEN).append(Component.literal(pokemon.ivs.getOrDefault(Stats.SPEED).toString()).withStyle(ChatFormatting.WHITE))),
+        val name = pokemon.species.translatedName.copy().withStyle(ExtrasLang.style("item.name_style"))
+        if (pokemon.shiny) {
+            name.append(ExtrasLang.get("item.name_shiny"))
+        }
 
-                        Component.literal("EVs: ").withStyle(ChatFormatting.DARK_AQUA),
-                        Component.literal("  HP: ").withStyle(ChatFormatting.RED).append(Component.literal(pokemon.evs.getOrDefault(Stats.HP).toString()).withStyle(ChatFormatting.WHITE))
-                                .append(Component.literal("  Atk: ").withStyle(ChatFormatting.BLUE).append(Component.literal(pokemon.evs.getOrDefault(Stats.ATTACK).toString()).withStyle(ChatFormatting.WHITE)))
-                                .append(Component.literal("  Def: ").withStyle(ChatFormatting.GRAY).append(Component.literal(pokemon.evs.getOrDefault(Stats.DEFENCE).toString()).withStyle(ChatFormatting.WHITE))),
-                        Component.literal("  SpAtk: ").withStyle(ChatFormatting.AQUA).append(Component.literal(pokemon.evs.getOrDefault(Stats.SPECIAL_ATTACK).toString()).withStyle(ChatFormatting.WHITE))
-                                .append(Component.literal("  SpDef: ").withStyle(ChatFormatting.YELLOW).append(Component.literal(pokemon.evs.getOrDefault(Stats.SPECIAL_DEFENCE).toString()).withStyle(ChatFormatting.WHITE)))
-                                .append(Component.literal("  Spd: ").withStyle(ChatFormatting.GREEN).append(Component.literal(pokemon.evs.getOrDefault(Stats.SPEED).toString()).withStyle(ChatFormatting.WHITE))),
-                        Component.literal("Moves: ").withStyle(ChatFormatting.DARK_GREEN),
-                        Component.literal(" ").append(Component.literal(moveOne).withStyle(ChatFormatting.WHITE)),
-                        Component.literal(" ").append(Component.literal(moveTwo).withStyle(ChatFormatting.WHITE)),
-                        Component.literal(" ").append(Component.literal(moveThree).withStyle(ChatFormatting.WHITE)),
-                        Component.literal(" ").append(Component.literal(moveFour).withStyle(ChatFormatting.WHITE)),
-                        Component.literal("Form: ").withStyle(ChatFormatting.GOLD).append(pokemon.form.name)
-                ))
-                .setCustomName(
-                        if (pokemon.shiny) pokemon.species.translatedName.copy().withStyle(ChatFormatting.GRAY).append(Component.literal(" ★").withStyle(ChatFormatting.GOLD)) else pokemon.species.translatedName.copy().withStyle(ChatFormatting.GRAY)
-                )
-                .build()
-        return itemstack
+        return ItemBuilder(PokemonItem.from(pokemon, 1))
+            .hideAdditional()
+            .addLore(lore.toTypedArray())
+            .setCustomName(name)
+            .build()
     }
 }

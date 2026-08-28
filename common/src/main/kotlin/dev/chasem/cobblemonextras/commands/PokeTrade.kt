@@ -1,5 +1,6 @@
 package dev.chasem.cobblemonextras.commands
 
+import dev.chasem.cobblemonextras.lang.ExtrasLang
 import com.cobblemon.mod.common.Cobblemon
 import com.cobblemon.mod.common.api.pokemon.evolution.Evolution
 import com.cobblemon.mod.common.pokemon.Pokemon
@@ -61,24 +62,24 @@ class PokeTrade {
         var cancelled: Boolean = false
 
         fun cancel() {
-            trader1.sendSystemMessage(Component.literal("Trade cancelled.").withStyle(ChatFormatting.RED))
-            trader2.sendSystemMessage(Component.literal("Trade cancelled.").withStyle(ChatFormatting.RED))
+            trader1.sendSystemMessage(ExtrasLang.get("poketrade.cancelled"))
+            trader2.sendSystemMessage(ExtrasLang.get("poketrade.cancelled"))
             tradeSessions.remove(trader1UUID)
             tradeSessions.remove(trader2UUID)
             this.cancelled = true
         }
 
         fun deny() {
-            trader1.sendSystemMessage(Component.literal("Trade declined.").withStyle(ChatFormatting.RED))
-            trader2.sendSystemMessage(Component.literal("Trade declined.").withStyle(ChatFormatting.RED))
+            trader1.sendSystemMessage(ExtrasLang.get("poketrade.declined"))
+            trader2.sendSystemMessage(ExtrasLang.get("poketrade.declined"))
             tradeSessions.remove(trader1UUID)
             tradeSessions.remove(trader2UUID)
             this.cancelled = true
         }
 
         fun expire() {
-            trader1.sendSystemMessage(Component.literal("Trade request expired.").withStyle(ChatFormatting.RED))
-            trader2.sendSystemMessage(Component.literal("Trade request expired.").withStyle(ChatFormatting.RED))
+            trader1.sendSystemMessage(ExtrasLang.get("poketrade.expired"))
+            trader2.sendSystemMessage(ExtrasLang.get("poketrade.expired"))
             tradeSessions.remove(trader1UUID)
             tradeSessions.remove(trader2UUID)
             this.cancelled = true
@@ -123,7 +124,7 @@ class PokeTrade {
                 })
             }
 
-            val toSend = Component.literal("Trade complete!").withStyle(ChatFormatting.GREEN)
+            val toSend = ExtrasLang.get("poketrade.complete")
             trader1.sendSystemMessage(toSend)
             trader2.sendSystemMessage(toSend)
             tradeSessions.remove(trader1UUID)
@@ -142,12 +143,12 @@ class PokeTrade {
                     // Expire sender's trade session.
                     tradeSession.expire()
                 } else {
-                    val cancel = Component.literal("[CANCEL]")
+                    val cancel = ExtrasLang.get("poketrade.cancel_button")
                             .withStyle(Style.EMPTY.withBold(true).withColor(ChatFormatting.RED)
                                     .withClickEvent(ClickEvent(ClickEvent.Action.RUN_COMMAND, "/poketrade cancel"))
-                                    .withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Cancel Trade"))));
+                                    .withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, ExtrasLang.get("poketrade.cancel_hover"))));
 
-                    player.sendSystemMessage(Component.literal("You have a trade pending. Cancel your last before creating a new trade.")
+                    player.sendSystemMessage(ExtrasLang.get("poketrade.own_pending")
                             .withStyle(ChatFormatting.RED).append(" ").append(cancel))
 
                     return 1
@@ -157,7 +158,7 @@ class PokeTrade {
             val tradePartnerPlayer: ServerPlayer = EntityArgument.getPlayer(ctx, "player")
 
             if (tradePartnerPlayer.uuid.equals(player.uuid)) {
-                ctx.getSource().sendFailure(Component.literal("Trading yourself? Your worth more than that <3"))
+                ctx.getSource().sendFailure(ExtrasLang.get("poketrade.self"))
                 return 1
             }
 
@@ -168,7 +169,7 @@ class PokeTrade {
                     // Expire trade partner's trade session.
                     tradeSession.expire()
                 } else {
-                    player.sendSystemMessage(Component.literal("Trade partner already has a trade pending, they must cancel or complete their trade before starting a new one.").withStyle(ChatFormatting.RED))
+                    player.sendSystemMessage(ExtrasLang.get("poketrade.partner_pending"))
                     return 1
                 }
             }
@@ -176,19 +177,18 @@ class PokeTrade {
             val tradeSession = TradeSession(player, tradePartnerPlayer)
             tradeSessions[tradePartnerPlayer.uuid] = tradeSession
             tradeSessions[player.uuid] = tradeSession
-            player.sendSystemMessage(Component.literal("Trade request sent.").withStyle(ChatFormatting.YELLOW))
-            tradePartnerPlayer.sendSystemMessage(Component.literal("Pokemon trade request received from ").withStyle(ChatFormatting.YELLOW)
-                    .append(Component.literal("${player.name}. ").withStyle(ChatFormatting.GREEN)))
+            player.sendSystemMessage(ExtrasLang.get("poketrade.sent"))
+            tradePartnerPlayer.sendSystemMessage(ExtrasLang.get("poketrade.received", player.name.string))
 
-            val accept = Component.literal("[ACCEPT]")
+            val accept = ExtrasLang.get("poketrade.accept_button")
                     .withStyle(Style.EMPTY.withBold(true).withColor(ChatFormatting.GREEN)
                             .withClickEvent(ClickEvent(ClickEvent.Action.RUN_COMMAND, "/poketrade accept"))
-                            .withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Accept Trade"))));
+                            .withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, ExtrasLang.get("poketrade.accept_hover"))));
 
-            val deny = Component.literal("[DENY]")
+            val deny = ExtrasLang.get("poketrade.deny_button")
                     .withStyle(Style.EMPTY.withBold(true).withColor(ChatFormatting.RED)
                             .withClickEvent(ClickEvent(ClickEvent.Action.RUN_COMMAND, "/poketrade deny"))
-                            .withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, Component.literal("Deny Trade"))));
+                            .withHoverEvent(HoverEvent(HoverEvent.Action.SHOW_TEXT, ExtrasLang.get("poketrade.deny_hover"))));
             tradePartnerPlayer.sendSystemMessage(accept.copy().append(" ").append(deny))
         }
         return 1
@@ -202,7 +202,7 @@ class PokeTrade {
 
             val tradeSession = tradeSessions.getOrDefault(player.uuid, null)
             if (tradeSession == null) {
-                player.sendSystemMessage(Component.literal("No pending trade session.").withStyle(ChatFormatting.YELLOW))
+                player.sendSystemMessage(ExtrasLang.get("poketrade.none_pending"))
                 return 1
             }
 

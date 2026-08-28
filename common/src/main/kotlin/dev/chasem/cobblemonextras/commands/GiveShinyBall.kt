@@ -1,5 +1,6 @@
 package dev.chasem.cobblemonextras.commands
 
+import dev.chasem.cobblemonextras.lang.ExtrasLang
 import com.cobblemon.mod.common.CobblemonItems
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.arguments.IntegerArgumentType
@@ -63,7 +64,7 @@ class GiveShinyBall {
         val targettedPlayer: ServerPlayer = EntityArgument.getPlayer(ctx, "player")
 
         if (targettedPlayer == null) {
-            ctx.source.sendFailure(Component.literal("Player not found."))
+            ctx.source.sendFailure(ExtrasLang.get("common.player_not_found"))
             return 0
         }
         val amount = IntegerArgumentType.getInteger(ctx, "amount")
@@ -94,14 +95,14 @@ class GiveShinyBall {
                     })
                 )
                 .setCustomName(
-                    Component.literal("Shiny Ball").withStyle(Style.EMPTY.withColor(ChatFormatting.GOLD).withBold(true))
+                    ExtrasLang.get("shinyball.name").withStyle(Style.EMPTY.withColor(ChatFormatting.GOLD).withBold(true))
                 )
                 .setCustomModel(CobblemonExtras.config.customModels.SHINY_BALL)
                 .addLore(
                     arrayOf(
-                        Component.literal("A unique ball that forces the captured")
+                        ExtrasLang.get("shinyball.lore_one")
                             .withStyle(Style.EMPTY.withColor(ChatFormatting.GRAY)),
-                        Component.literal(" pokemon to transform into a shiny variant.")
+                        ExtrasLang.get("shinyball.lore_two")
                             .withStyle(Style.EMPTY.withColor(ChatFormatting.GRAY))
                     )
                 )

@@ -4,9 +4,9 @@ import com.cobblemon.mod.common.Cobblemon
 import com.mojang.brigadier.CommandDispatcher
 import com.mojang.brigadier.context.CommandContext
 import dev.chasem.cobblemonextras.CobblemonExtras
+import dev.chasem.cobblemonextras.lang.ExtrasLang
 import dev.chasem.cobblemonextras.permissions.CobblemonExtrasPermissions
 import dev.chasem.cobblemonextras.util.PokemonUtility
-import net.minecraft.ChatFormatting
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.Commands
 import net.minecraft.network.chat.Component
@@ -22,39 +22,34 @@ class PokeShoutAll {
     }
 
     private fun execute(ctx: CommandContext<CommandSourceStack>): Int {
-        if (ctx.source.player != null) {
-            val player: ServerPlayer = ctx.source.player!!;
-            val party = Cobblemon.storage.getParty(player)
-            val toSend = Component.literal("[").withStyle(ChatFormatting.GREEN)
-                    .append(Component.literal("PokeShoutAll").withStyle(ChatFormatting.YELLOW))
-                    .append(Component.literal("] ").withStyle(ChatFormatting.GREEN))
-                    .append(player.displayName!!.copy().append(Component.literal(": ")).withStyle(ChatFormatting.WHITE))
-            toSend.append(("\n"))
-            for (i in 0..5) {
-                val pokemon = party.get(i)
-                if (pokemon != null) {
-                    toSend.append("    " + (i + 1) + ": ")
-                    val pokemonName = pokemon.species.translatedName.withStyle(ChatFormatting.GREEN).append(" ")
-                    toSend.append(pokemonName)
-                    if (pokemon.shiny) {
-                        toSend.append(Component.literal("★ ").withStyle(ChatFormatting.GOLD))
-                    }
-                    PokemonUtility.getHoverText(toSend, pokemon)
-                    if (i != 5) {
-                        toSend.append(("\n"))
-                    }
-                } else {
-                    toSend.append("    " + (i + 1) + ": ")
-                    toSend.append(Component.literal("Empty").withStyle(ChatFormatting.RED))
-                    if (i != 5) {
-                        toSend.append(("\n"))
-                    }
-                }
+        val player: ServerPlayer = ctx.source.player
+            ?: run {
+                ctx.source.sendFailure(ExtrasLang.get("common.players_only"))
+                return 1
             }
-            ctx.getSource().getServer().playerList.players.forEach { serverPlayer -> serverPlayer.sendSystemMessage(toSend) }
-        } else {
-            ctx.getSource().sendFailure(Component.literal("Sorry, this is only for players."))
+
+        val party = Cobblemon.storage.getParty(player)
+        val newLine = Component.literal("\n")
+        val toSend = ExtrasLang.get("pokeshoutall.header")
+                .append(player.displayName!!.copy().withStyle(ExtrasLang.style("pokeshoutall.player_style")))
+                .append(ExtrasLang.get("pokeshoutall.separator"))
+
+        // Every slot is printed, empty ones included: a gap in the list is
+        // information too, and skipping them would make slot numbers lie.
+        for (i in 0..5) {
+            toSend.append(newLine).append(ExtrasLang.get("pokeshoutall.slot", i + 1))
+            val pokemon = party.get(i)
+            if (pokemon == null) {
+                toSend.append(ExtrasLang.get("pokeshoutall.empty"))
+                continue
+            }
+            toSend.append(pokemon.species.translatedName.copy().withStyle(ExtrasLang.style("pokeshoutall.species_style")))
+            if (pokemon.shiny) {
+                toSend.append(ExtrasLang.get("pokeshoutall.shiny"))
+            }
+            PokemonUtility.getHoverText(toSend, pokemon)
         }
+        ctx.source.server.playerList.players.forEach { it.sendSystemMessage(toSend) }
         return 1
     }
 }

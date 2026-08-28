@@ -1,17 +1,16 @@
 package dev.chasem.cobblemonextras.commands
 
 import com.cobblemon.mod.common.Cobblemon
+import com.mojang.brigadier.CommandDispatcher
+import com.mojang.brigadier.arguments.IntegerArgumentType
+import com.mojang.brigadier.context.CommandContext
 import dev.chasem.cobblemonextras.CobblemonExtras
+import dev.chasem.cobblemonextras.lang.ExtrasLang
 import dev.chasem.cobblemonextras.permissions.CobblemonExtrasPermissions
 import dev.chasem.cobblemonextras.util.PokemonUtility
 import net.minecraft.commands.CommandSourceStack
 import net.minecraft.commands.Commands
 import net.minecraft.server.level.ServerPlayer
-import com.mojang.brigadier.CommandDispatcher
-import com.mojang.brigadier.arguments.IntegerArgumentType
-import com.mojang.brigadier.context.CommandContext
-import net.minecraft.ChatFormatting
-import net.minecraft.network.chat.Component
 
 class PokeShout {
     fun register(dispatcher: CommandDispatcher<CommandSourceStack>) {
@@ -23,29 +22,31 @@ class PokeShout {
     }
 
     private fun execute(ctx: CommandContext<CommandSourceStack>): Int {
-        if (ctx.source.player != null) {
-            val player: ServerPlayer = ctx.source.player!!
-            val slot: Int = ctx.getArgument<Int>("slot", Int::class.java)
-            val party = Cobblemon.storage.getParty(player)
-            val pokemon = party.get(slot - 1)
-            if (pokemon != null) {
-                val toSend = Component.literal("[").withStyle(ChatFormatting.GREEN)
-                        .append(Component.literal("PokeShout").withStyle(ChatFormatting.YELLOW))
-                        .append(Component.literal("] ").withStyle(ChatFormatting.GREEN))
-                        .append(player.displayName!!.copy().append(Component.literal(": ")).withStyle(ChatFormatting.WHITE))
-                val pokemonName = pokemon.species.translatedName.withStyle(ChatFormatting.GREEN).append(" ")
-                toSend.append(pokemonName)
-                if (pokemon.shiny) {
-                    toSend.append(Component.literal("★ ").withStyle(ChatFormatting.GOLD))
-                }
-                PokemonUtility.getHoverText(toSend, pokemon)
-                ctx.source.server.playerList.players.forEach { serverPlayer -> serverPlayer.sendSystemMessage(toSend) }
-            } else {
-                ctx.source.sendFailure(Component.literal("No Pokemon in slot."))
+        val player: ServerPlayer = ctx.source.player
+            ?: run {
+                ctx.source.sendFailure(ExtrasLang.get("common.players_only"))
+                return 1
             }
-        } else {
-            ctx.source.sendFailure(Component.literal("Sorry, this is only for players."))
+
+        val slot: Int = ctx.getArgument<Int>("slot", Int::class.java)
+        val pokemon = Cobblemon.storage.getParty(player).get(slot - 1)
+        if (pokemon == null) {
+            ctx.source.sendFailure(ExtrasLang.get("pokeshout.empty_slot"))
+            return 1
         }
+
+        // The player's display name stays a component rather than being flattened
+        // into the header: it may carry a rank prefix or colour that a plain
+        // string would throw away.
+        val toSend = ExtrasLang.get("pokeshout.header")
+                .append(player.displayName!!.copy().withStyle(ExtrasLang.style("pokeshout.player_style")))
+                .append(ExtrasLang.get("pokeshout.separator"))
+                .append(pokemon.species.translatedName.copy().withStyle(ExtrasLang.style("pokeshout.species_style")))
+        if (pokemon.shiny) {
+            toSend.append(ExtrasLang.get("pokeshout.shiny"))
+        }
+        PokemonUtility.getHoverText(toSend, pokemon)
+        ctx.source.server.playerList.players.forEach { it.sendSystemMessage(toSend) }
         return 1
     }
 }
